@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airport Transfer Selection & Booking</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans+SC:wght@400;700&display=swap">
+    <style>
+         body {
+            font-family: 'Alegreya Sans SC', sans-serif; /* Apply the font */
+            background-color: #000000; /* Black background */
+            color: #FFFFFF; /* White text */
+            line-height: 1.6;
+            margin: 20px;
+        }
+
+        /* Basic styling to hide sections initially */
+        .transfer-options,
+        .trip-type-options,
+        .passenger-options,
+        .datetime-options {
+            display: none; /* Hide all extra sections by default */
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #333333; /* Lighter border for dark background */
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input[type="number"], input[type="datetime-local"] {
+            padding: 8px;
+            min-width: 250px; /* Adjust width as needed */
+            margin-bottom: 15px;
+            display: block; /* Make them block elements for consistent layout */
+            box-sizing: border-box; /* Include padding and border in element's total width */
+             background-color: #333333; /* Darker input background */
+             color: #FFFFFF; /* White text in inputs */
+             border: 1px solid #555555; /* Slightly lighter border */
+             border-radius: 4px;
+        }
+         /* Style for number input spin buttons (optional) */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            appearance: textfield; /* Standard property for compatibility */
+            -moz-appearance: textfield; /* Firefox */
+        }
+
+
+         .radio-group label {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: normal;
+         }
+         .radio-group input[type="radio"] {
+             display: inline-block;
+             margin-right: 5px;
+             vertical-align: middle; /* Align radio button vertically */
+             min-width: auto; /* Reset min-width for radio buttons */
+             margin-bottom: 0; /* Adjust margin */
+         }
+          .radio-group label {
+             vertical-align: middle; /* Align label vertically */
+         }
+
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #selectedData {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #555555; /* Lighter border */
+            background-color: #1a1a1a; /* Slightly lighter background */
+            color: #FFFFFF; /* White text */
+            display: none; /* Hide initially */
+            border-radius: 5px;
+        }
+        #selectedData h2 {
+            margin-top: 0;
+            color: #007bff; /* Highlight heading */
+        }
+        .error {
+            color: #ff6666; /* Lighter red for dark background */
+            font-weight: bold;
+            margin-top: 10px;
+        }
+         .price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #66ff66; /* Green for dark background */
+            margin-top: 10px;
+         }
+         a {
+             color: #88ccff; /* Lighter link color */
+         }
+         a:hover {
+             color: #55aaff;
+         }
+    </style>
+</head>
+<body>
+    <h1>Select Your Airport and Transfer Service</h1>
+    <form id="transferForm"></form>
+        <<div>
+            <label for="airportSelect">Select Airport:</label>
+            <select id="airportSelect" name="airport" required>
+                <option value="">-- Select an Airport --</option>
+                <option value="MPH">Caticlan Airport (MPH)</option>
+                <option value="KLO">Kalibo Airport (KLO)</option>
+                <option value="NAIA">Manila Airport (NAIA)</option>
+                <option value="CEB">Mactan-Cebu Airport (CEB)</option>
+            </select>
+        </div>
+    
+        <div id="tripTypeSection" class="trip-type-options">
+            <label>Select Trip Type:</label>
+            <div class="radio-group">
+                <input type="radio" id="oneWayArrival" name="trip_type" value="Arrival One-way">
+                <label for="oneWayArrival">Arrival One-way</label>
+                <input type="radio" id="oneWayDeparture" name="trip_type" value="Departure One-way">
+                <label for="oneWayDeparture">Departure One-way</label>
+                <input type="radio" id="roundTrip" name="trip_type" value="Round Trip">
+                <label for="roundTrip">Round Trip</label>
+            </div>
+        </div>
+    
+        <div id="passengerSection" class="passenger-options">
+            <label>Enter Number of Passengers:</label>
+            <div>
+            </div>
+            <div>
+            </div>
+            <div>
+            </div>
+        </div> <!-- Close the unclosed div -->
+    
+        <div id="datetimeSection" class="datetime-options">
+value="0" min="0" max="15">
+            </div>
+            <div>
+            </div>
+                <label for="adultsCount">Adults (6+):</label>
+                <input type="number" id="adultsCount" name="adults" class="passenger-input" value="1" min="1" max="15" required>
+            </div>
+            <div>
+                <label for="seniorCount">Senior (60+):</label>
+                 <input type="number" id="seniorCount" name="senior" class="passenger-input" value="0" min="0" max="15">
+            </div>
+             <p id="payingGuestWarning" class="error" style="display: none;">Please select at least one Adult or Senior passenger.</p>
+              <p id="totalGuestWarning" class="error" style="display: none;">Total Adults + Seniors cannot exceed 15 for pricing calculation based on available data.</p>
+        </div>
+    
+    
+        <div id="datetimeSection" class="datetime-options">
+            <div id="oneWayDateTime" class="datetime-group" style="display: none;">
+                 <label for="oneWayDate">Date & Time:</label>
+                 <input type="datetime-local" id="oneWayDate" name="one_way_datetime">
+            </div>
+            <div id="roundTripDateTime" class="datetime-group" style="display: none;">
+                 <label for="arrivalDate">Arrival Date & Time:</label>
+                 <input type="datetime-local" id="arrivalDate" name="arrival_datetime">
+                 <label for="departureDate">Departure Date & Time:</label>
+                 <input type="datetime-local" id="departureDate" name="departure_datetime">
+            </div>
+        </div>
+    
+    
+        <div id="transferMph" class="transfer-options">
+            <label for="transferMphSelect">Transfer service (MPH):</label>
+            <select id="transferMphSelect" name="transfer_mph" class="transfer-select" required>
+                <option value="">-- Select Transfer Service --</option>
+                <option value="standard_mph">✈️ STANDARD AIRPORT TRANSFER (MPH)</option>
+                <option value="vip_grande_mph">👑V.I.P GRANDE AIRPORT TRANSFER (MPH)</option>
+                <option value="vip_speedboat_mph">👑V.I.P SPEEDBOAT AIRPORT TRANSFER (MPH)</option>
+                <option value="vip_helicopter_mph">👑V.I.P HELICOPTER AIRPORT TRANSFER (MPH)</option>
+            </select>
+        </div>
+    
+        <div id="transferKlo" class="transfer-options">
+            <label for="transferKloSelect">Transfer service (KLO):</label>
+            <select id="transferKloSelect" name="transfer_klo" class="transfer-select" required>
+                <option value="">-- Select Transfer Service --</option>
+                <option value="standard_klo">✈️ STANDARD AIRPORT TRANSFER (KLO)</option>
+                <option value="vip_grande_klo">👑V.I.P GRANDE AIRPORT TRANSFER (KLO)</option>
+                <option value="vip_speedboat_klo">👑V.I.P SPEEDBOAT AIRPORT TRANSFER (KLO)</option>
+                <option value="vip_helicopter_klo">👑V.I.P HELICOPTER AIRPORT TRANSFER (KLO)</option>
+            </select>
+        </div>
+    
+        <div id="transferNaia" class="transfer-options">
+            <label for="transferNaiaSelect">Transfer service (NAIA):</label>
+            <select id="transferNaiaSelect" name="transfer_naia" class="transfer-select" required>
+                <option value="">-- Select Transfer Service --</option>
+                <option value="standard_naia">✈️ STANDARD AIRPORT TRANSFER (NAIA) International -domestic</option>
+                <option value="vip_grande_naia">👑V.I.P GRANDE AIRPORT TRANSFER (NAIA) International -domestic</option>
+                <option value="vip_helicopter_naia">👑V.I.P HELICOPTER AIRPORT TRANSFER (NAIA)</option>
+            </select>
+        </div>
+    
+        <div id="transferCeb" class="transfer-options">
+            <label for="transferCebSelect">Transfer service (CEB):</label>
+            <select id="transferCebSelect" name="transfer_ceb" class="transfer-select" required>
+                <option value="">-- Select Transfer Service --</option>
+                <option value="standard_ceb">🚌 STANDARD BUS TRANSFER (CEB)</option>
+                <option value="vip_van_ceb">👑 V.I.P VAN TRANSFER (CEB)</option>
+                <option value="ferry_ceb">🚢 FERRY CONNECTION (CEB)</option>
+                </select>
+        </div>
+    
+        <button type="submit">Calculate Price & Book</button>
+    </form>
+    
+    <div id="selectedData">
+        <h2>Booking Summary:</h2>
+        <p id="displayAirport"></p>
+        <p id="displayTransfer"></p>
+        <p id="displayTripType"></p>
+        <p id="displayPassengers"></p>
+        <p id="displayDateTime"></p>
+        <p id="displayPrice" class="price"></p>
+        <p id="priceError" class="error" style="display: none;"></p>
+    
+        </div>
+    
+    <script></script>
+        // --- Pricing Data ---
+        // Store your pricing data in a JavaScript object
+        // Structure: prices[airportCode][transferValue][tripType][totalPayingGuests]
+        // Value is an object: { children: price, adults: price, senior: price }
+        // Prices are stored as numbers (remove currency symbols and commas)
+        const pricingData = {
+              "MPH": {
+                "standard_mph": {
+                    "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 0, adults: 1199.00, senior: 1099.00 },
+                        2: { children: 750.00, adults: 2398.00, senior: 2198.00 },
+                        3: { children: 1500.00, adults: 3597.00, senior: 3297.00 },
+                        4: { children: 2250.00, adults: 4796.00, senior: 4396.00 },
+                        5: { children: 3000.00, adults: 5995.00, senior: 5495.00 },
+                        6: { children: 3750.00, adults: 7194.00, senior: 6594.00 },
+                        7: { children: 4500.00, adults: 8393.00, senior: 7693.00 },
+                        8: { children: 5250.00, adults: 9592.00, senior: 8792.00 },
+                        9: { children: 6000.00, adults: 10791.00, senior: 9891.00 },
+                        10: { children: 6750.00, adults: 11990.00, senior: 10990.00 },
+                        11: { children: 7500.00, adults: 13189.00, senior: 12089.00 },
+                        12: { children: 8250.00, adults: 14388.00, senior: 13188.00 },
+                        13: { children: 9000.00, adults: 15587.00, senior: 14287.00 },
+                        14: { children: 9750.00, adults: 16786.00, senior: 15386.00 },
+                        15: { children: 10500.00, adults: 17985.00, senior: 16495.00 }
+                    },
+                    "Departure One-way": { // Assuming same as Arrival One-way
+                         1: { children: 0, adults: 1199.00, senior: 1099.00 },
+                        2: { children: 750.00, adults: 2398.00, senior: 2198.00 },
+                        3: { children: 1500.00, adults: 3597.00, senior: 3297.00 },
+                        4: { children: 2250.00, adults: 4796.00, senior: 4396.00 },
+                        5: { children: 3000.00, adults: 5995.00, senior: 5495.00 },
+                        6: { children: 3750.00, adults: 7194.00, senior: 6594.00 },
+                        7: { children: 4500.00, adults: 8393.00, senior: 7693.00 },
+                        8: { children: 5250.00, adults: 9592.00, senior: 8792.00 },
+                        9: { children: 6000.00, adults: 10791.00, senior: 9891.00 },
+                        10: { children: 6750.00, adults: 11990.00, senior: 10990.00 },
+                        11: { children: 7500.00, adults: 13189.00, senior: 12089.00 },
+                        12: { children: 8250.00, adults: 14388.00, senior: 13188.00 },
+                        13: { children: 9000.00, adults: 15587.00, senior: 14287.00 },
+                        14: { children: 9750.00, adults: 16786.00, senior: 15386.00 },
+                        15: { children: 10500.00, adults: 17985.00, senior: 16495.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 750.00, adults: 2398.00, senior: 2198.00 },
+                        2: { children: 1500.00, adults: 4796.00, senior: 4396.00 },
+                        3: { children: 3000.00, adults: 7194.00, senior: 6594.00 },
+                        4: { children: 4500.00, adults: 9592.00, senior: 8792.00 },
+                        5: { children: 6000.00, adults: 11990.00, senior: 10990.00 },
+                        6: { children: 7500.00, adults: 14388.00, senior: 13188.00 },
+                        7: { children: 9000.00, adults: 16786.00, senior: 15386.00 },
+                        8: { children: 10500.00, adults: 19184.00, senior: 17584.00 },
+                        9: { children: 12000.00, adults: 21582.00, senior: 19782.00 },
+                        10: { children: 13500.00, adults: 23980.00, senior: 21980.00 },
+                        11: { children: 15000.00, adults: 26378.00, senior: 24178.00 },
+                        12: { children: 16500.00, adults: 28776.00, senior: 26376.00 },
+                        13: { children: 18000.00, adults: 31174.00, senior: 28574.00 },
+                        14: { children: 19500.00, adults: 33572.00, senior: 30772.00 },
+                        15: { children: 21000.00, adults: 35970.00, senior: 32970.00 }
+                    }
+                },
+                "vip_grande_mph": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 0.00, adults: 2499.00, senior: 2299.00 },
+                        2: { children: 900.00, adults: 4998.00, senior: 4598.00 },
+                        3: { children: 1800.00, adults: 7497.00, senior: 6897.00 },
+                        4: { children: 3600.00, adults: 9996.00, senior: 9196.00 },
+                        5: { children: 5400.00, adults: 12495.00, senior: 11495.00 },
+                        6: { children: 7000.00, adults: 14994.00, senior: 13794.00 },
+                        7: { children: 8733.33, adults: 17493.00, senior: 16093.00 },
+                        8: { children: 10433.33, adults: 19992.00, senior: 18392.00 },
+                        9: { children: 12155.56, adults: 22491.00, senior: 20691.00 },
+                        10: { children: 13872.22, adults: 24990.00, senior: 22990.00 },
+                        11: { children: 15592.59, adults: 27489.00, senior: 25289.00 },
+                        12: { children: 17312.04, adults: 29988.00, senior: 27588.00 },
+                        13: { children: 19031.48, adults: 32487.00, senior: 29887.00 },
+                        14: { children: 20750.93, adults: 34986.00, senior: 32186.00 },
+                        15: { children: 22470.37, adults: 37485.00, senior: 34485.00 }
+                    },
+                    "Departure One-way": { // Assuming same as Arrival One-way
+                         1: { children: 0.00, adults: 2499.00, senior: 2299.00 },
+                        2: { children: 900.00, adults: 4998.00, senior: 4598.00 },
+                        3: { children: 1800.00, adults: 7497.00, senior: 6897.00 },
+                        4: { children: 3600.00, adults: 9996.00, senior: 9196.00 },
+                        5: { children: 5400.00, adults: 12495.00, senior: 11495.00 },
+                        6: { children: 7000.00, adults: 14994.00, senior: 13794.00 },
+                        7: { children: 8733.33, adults: 17493.00, senior: 16093.00 },
+                        8: { children: 10433.33, adults: 19992.00, senior: 18392.00 },
+                        9: { children: 12155.56, adults: 22491.00, senior: 20691.00 },
+                        10: { children: 13872.22, adults: 24990.00, senior: 22990.00 },
+                        11: { children: 15592.59, adults: 27489.00, senior: 25289.00 },
+                        12: { children: 17312.04, adults: 29988.00, senior: 27588.00 },
+                        13: { children: 19031.48, adults: 32487.00, senior: 29887.00 },
+                        14: { children: 20750.93, adults: 34986.00, senior: 32186.00 },
+                        15: { children: 22470.37, adults: 37485.00, senior: 34485.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 900.00, adults: 4998.00, senior: 4598.00 },
+                        2: { children: 1800.00, adults: 9996.00, senior: 9196.00 },
+                        3: { children: 3600.00, adults: 14994.00, senior: 13794.00 },
+                        4: { children: 7200.00, adults: 19992.00, senior: 18392.00 },
+                        5: { children: 10800.00, adults: 24990.00, senior: 22990.00 },
+                        6: { children: 14000.00, adults: 29988.00, senior: 27588.00 },
+                        7: { children: 17466.67, adults: 34986.00, senior: 32186.00 },
+                        8: { children: 20866.67, adults: 39984.00, senior: 36784.00 },
+                        9: { children: 24311.11, adults: 44982.00, senior: 41382.00 },
+                        10: { children: 27744.44, adults: 49980.00, senior: 45980.00 },
+                        11: { children: 31185.19, adults: 54978.00, senior: 50578.00 },
+                        12: { children: 34624.07, adults: 59976.00, senior: 55176.00 },
+                        13: { children: 38062.96, adults: 64974.00, senior: 59774.00 },
+                        14: { children: 41501.85, adults: 69972.00, senior: 64372.00 },
+                        15: { children: 44940.74, adults: 74970.00, senior: 68970.00 }
+                    }
+                },
+                 "vip_speedboat_mph": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 0.00, adults: 3999.00, senior: 3799.00 },
+                        2: { children: 2500.00, adults: 7998.00, senior: 7598.00 },
+                        3: { children: 4999.00, adults: 11997.00, senior: 11397.00 },
+                        4: { children: 6999.00, adults: 15996.00, senior: 15196.00 },
+                        5: { children: 8999.00, adults: 18496.00, senior: 17696.00 },
+                        6: { children: 10999.00, adults: 20996.00, senior: 20196.00 },
+                        7: { children: 12999.00, adults: 23496.00, senior: 22696.00 },
+                        8: { children: 14999.00, adults: 25996.00, senior: 25196.00 },
+                        9: { children: 16999.00, adults: 27996.00, senior: 27196.00 },
+                        10: { children: 18999.00, adults: 29996.00, senior: 29196.00 },
+                        11: { children: 20999.00, adults: 31746.00, senior: 30946.00 },
+                        12: { children: 22999.00, adults: 33496.00, senior: 32696.00 },
+                        13: { children: 24999.00, adults: 35246.00, senior: 34446.00 },
+                        14: { children: 26999.00, adults: 36996.00, senior: 36196.00 },
+                        15: { children: 28999.00, adults: 38746.00, senior: 37946.00 }
+                    },
+                    "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 0.00, adults: 3999.00, senior: 3799.00 },
+                        2: { children: 2500.00, adults: 7998.00, senior: 7598.00 },
+                        3: { children: 4999.00, adults: 11997.00, senior: 11397.00 },
+                        4: { children: 6999.00, adults: 15996.00, senior: 15196.00 },
+                        5: { children: 8999.00, adults: 18496.00, senior: 17696.00 },
+                        6: { children: 10999.00, adults: 20996.00, senior: 20196.00 },
+                        7: { children: 12999.00, adults: 23496.00, senior: 22696.00 },
+                        8: { children: 14999.00, adults: 25996.00, senior: 25196.00 },
+                        9: { children: 16999.00, adults: 27996.00, senior: 27196.00 },
+                        10: { children: 18999.00, adults: 29996.00, senior: 29196.00 },
+                        11: { children: 20999.00, adults: 31746.00, senior: 30946.00 },
+                        12: { children: 22999.00, adults: 33496.00, senior: 32696.00 },
+                        13: { children: 24999.00, adults: 35246.00, senior: 34446.00 },
+                        14: { children: 26999.00, adults: 36996.00, senior: 36196.00 },
+                        15: { children: 28999.00, adults: 38746.00, senior: 37946.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 2500.00, adults: 7998.00, senior: 7598.00 },
+                        2: { children: 5000.00, adults: 15996.00, senior: 15196.00 },
+                        3: { children: 9998.00, adults: 23994.00, senior: 22794.00 },
+                        4: { children: 13998.00, adults: 31992.00, senior: 30392.00 },
+                        5: { children: 17998.00, adults: 36992.00, senior: 35392.00 },
+                        6: { children: 21998.00, adults: 41992.00, senior: 40392.00 },
+                        7: { children: 25998.00, adults: 46992.00, senior: 45392.00 },
+                        8: { children: 29998.00, adults: 51992.00, senior: 50392.00 },
+                        9: { children: 33998.00, adults: 55992.00, senior: 54392.00 },
+                        10: { children: 37998.00, adults: 59992.00, senior: 58392.00 },
+                        11: { children: 41998.00, adults: 63492.00, senior: 61892.00 },
+                        12: { children: 45998.00, adults: 66992.00, senior: 65392.00 },
+                        13: { children: 49998.00, adults: 70492.00, senior: 68892.00 },
+                        14: { children: 53998.00, adults: 73992.00, senior: 72392.00 },
+                        15: { children: 57998.00, adults: 77492.00, senior: 75892.00 }
+                    }
+                },
+                "vip_helicopter_mph": {
+                    "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 49999.00, adults: 54999.00, senior: 52999.00 },
+                        2: { children: 59999.00, adults: 64999.00, senior: 61999.00 },
+                        3: { children: 69999.00, adults: 74999.01, senior: 70999.00 },
+                        4: { children: 99998.00, adults: 109998.00, senior: 105998.00 },
+                        5: { children: 119998.00, adults: 129998.00, senior: 123998.00 },
+                        6: { children: 139998.00, adults: 149998.02, senior: 141998.00 },
+                        7: { children: 149997.00, adults: 164997.00, senior: 158997.00 },
+                        8: { children: 179997.00, adults: 194997.00, senior: 185997.00 },
+                        9: { children: 209997.00, adults: 224997.03, senior: 212997.00 },
+                        10: { children: 199996.00, adults: 219996.00, senior: 211996.00 },
+                        11: { children: 239996.00, adults: 259996.00, senior: 247996.00 },
+                        12: { children: 279996.00, adults: 299996.04, senior: 283996.00 },
+                        13: { children: 249995.00, adults: 274995.00, senior: 264995.00 },
+                        14: { children: 299995.00, adults: 324995.00, senior: 309995.00 },
+                        15: { children: 349995.00, adults: 374995.05, senior: 354995.00 }
+                    },
+                    "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 49999.00, adults: 54999.00, senior: 52999.00 },
+                        2: { children: 59999.00, adults: 64999.00, senior: 61999.00 },
+                        3: { children: 69999.00, adults: 74999.01, senior: 70999.00 },
+                        4: { children: 99998.00, adults: 109998.00, senior: 105998.00 },
+                        5: { children: 119998.00, adults: 129998.00, senior: 123998.00 },
+                        6: { children: 139998.00, adults: 149998.02, senior: 141998.00 },
+                        7: { children: 149997.00, adults: 164997.00, senior: 158997.00 },
+                        8: { children: 179997.00, adults: 194997.00, senior: 185997.00 },
+                        9: { children: 209997.00, adults: 224997.03, senior: 212997.00 },
+                        10: { children: 199996.00, adults: 219996.00, senior: 211996.00 },
+                        11: { children: 239996.00, adults: 259996.00, senior: 247996.00 },
+                        12: { children: 279996.00, adults: 299996.04, senior: 283996.00 },
+                        13: { children: 249995.00, adults: 274995.00, senior: 264995.00 },
+                        14: { children: 299995.00, adults: 324995.00, senior: 309995.00 },
+                        15: { children: 349995.00, adults: 374995.05, senior: 354995.00 }
+                    },
+                    "Round Trip": {
+                         1: { children: 99998.00, adults: 109998.00, senior: 105998.00 },
+                        2: { children: 119998.00, adults: 129998.00, senior: 123998.00 },
+                        3: { children: 139998.00, adults: 149998.02, senior: 141998.00 },
+                        4: { children: 199996.00, adults: 219996.00, senior: 211996.00 },
+                        5: { children: 239996.00, adults: 259996.00, senior: 247996.00 },
+                        6: { children: 279996.00, adults: 299996.04, senior: 283996.00 },
+                        7: { children: 299994.00, adults: 329994.00, senior: 317994.00 },
+                        8: { children: 359994.00, adults: 389994.00, senior: 371994.00 },
+                        9: { children: 419994.00, adults: 449994.06, senior: 425994.00 },
+                        10: { children: 399992.00, adults: 439992.00, senior: 423992.00 },
+                        11: { children: 479992.00, adults: 519992.00, senior: 495992.00 },
+                        12: { children: 559992.00, adults: 599992.08, senior: 567992.00 },
+                        13: { children: 499990.00, adults: 549990.00, senior: 529990.00 },
+                        14: { children: 599990.00, adults: 649990.00, senior: 619990.00 },
+                        15: { children: 699990.00, adults: 749990.10, senior: 709990.00 }
+                    }
+                }
+            },
+            "KLO": {
+                "standard_klo": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 0.00, adults: 1399.00, senior: 1400.00 }, // Note: senior > adults here
+                        2: { children: 1000.00, adults: 2798.00, senior: 2800.00 },
+                        3: { children: 1750.00, adults: 4197.00, senior: 4200.00 },
+                        4: { children: 2250.00, adults: 5596.00, senior: 5600.00 },
+                        5: { children: 3000.00, adults: 6995.00, senior: 7000.00 },
+                        6: { children: 3750.00, adults: 8394.00, senior: 8400.00 },
+                        7: { children: 4500.00, adults: 9893.00, senior: 9800.00 },
+                        8: { children: 5250.00, adults: 11249.00, senior: 11200.00 },
+                        9: { children: 6000.00, adults: 12658.00, senior: 12600.00 },
+                        10: { children: 6750.00, adults: 14068.00, senior: 14000.00 },
+                        11: { children: 7500.00, adults: 15478.00, senior: 15400.00 },
+                        12: { children: 8250.00, adults: 16888.00, senior: 16800.00 },
+                        13: { children: 9000.00, adults: 18297.60, senior: 18200.00 },
+                        14: { children: 9750.00, adults: 19707.40, senior: 19600.00 },
+                        15: { children: 10500.00, adults: 21117.20, senior: 21000.00 }
+                    },
+                     "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 0.00, adults: 1399.00, senior: 1400.00 },
+                        2: { children: 1000.00, adults: 2798.00, senior: 2800.00 },
+                        3: { children: 1750.00, adults: 4197.00, senior: 4200.00 },
+                        4: { children: 2250.00, adults: 5596.00, senior: 5600.00 },
+                        5: { children: 3000.00, adults: 6995.00, senior: 7000.00 },
+                        6: { children: 3750.00, adults: 8394.00, senior: 8400.00 },
+                        7: { children: 4500.00, adults: 9893.00, senior: 9800.00 },
+                        8: { children: 5250.00, adults: 11249.00, senior: 11200.00 },
+                        9: { children: 6000.00, adults: 12658.00, senior: 12600.00 },
+                        10: { children: 6750.00, adults: 14068.00, senior: 14000.00 },
+                        11: { children: 7500.00, adults: 15478.00, senior: 15400.00 },
+                        12: { children: 8250.00, adults: 16888.00, senior: 16800.00 },
+                        13: { children: 9000.00, adults: 18297.60, senior: 18200.00 },
+                        14: { children: 9750.00, adults: 19707.40, senior: 19600.00 },
+                        15: { children: 10500.00, adults: 21117.20, senior: 21000.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 1000.00, adults: 2798.00, senior: 2800.00 },
+                        2: { children: 2000.00, adults: 5596.00, senior: 5600.00 },
+                        3: { children: 3500.00, adults: 8394.00, senior: 8400.00 },
+                        4: { children: 4500.00, adults: 11192.00, senior: 11200.00 },
+                        5: { children: 6000.00, adults: 13990.00, senior: 14000.00 },
+                        6: { children: 7500.00, adults: 16788.00, senior: 16800.00 },
+                        7: { children: 9000.00, adults: 19786.00, senior: 19600.00 },
+                        8: { children: 10500.00, adults: 22498.00, senior: 22400.00 },
+                        9: { children: 12000.00, adults: 25316.00, senior: 25200.00 },
+                        10: { children: 13500.00, adults: 28136.00, senior: 28000.00 },
+                        11: { children: 15000.00, adults: 30956.00, senior: 30800.00 },
+                        12: { children: 16500.00, adults: 33776.00, senior: 33600.00 },
+                        13: { children: 18000.00, adults: 36595.20, senior: 36400.00 },
+                        14: { children: 19500.00, adults: 39414.80, senior: 39200.00 },
+                        15: { children: 21000.00, adults: 42234.40, senior: 42000.00 }
+                    }
+                },
+                "vip_grande_klo": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 0.00, adults: 4999.00, senior: 4799.00 },
+                        2: { children: 900.00, adults: 8999.00, senior: 8799.00 },
+                        3: { children: 1800.00, adults: 12999.00, senior: 11499.00 },
+                        4: { children: 3600.00, adults: 16999.00, senior: 16299.00 },
+                        5: { children: 5400.00, adults: 18999.00, senior: 18099.00 },
+                        6: { children: 7000.00, adults: 20999.00, senior: 19999.00 },
+                        7: { children: 8733.33, adults: 22999.00, senior: 21999.00 },
+                        8: { children: 10433.33, adults: 24999.00, senior: 23799.00 },
+                        9: { children: 12155.56, adults: 26999.00, senior: 25499.00 },
+                        10: { children: 13872.22, adults: 28999.00, senior: 27299.00 },
+                        11: { children: 15583.33, adults: 30999.00, senior: 29499.00 },
+                        12: { children: 17297.22, adults: 32999.00, senior: 30999.00 },
+                        13: { children: 19011.11, adults: 34999.00, senior: 32799.00 },
+                        14: { children: 20725.00, adults: 36999.00, senior: 34499.00 },
+                        15: { children: 22438.89, adults: 38999.00, senior: 36999.00 }
+                    },
+                     "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 0.00, adults: 4999.00, senior: 4799.00 },
+                        2: { children: 900.00, adults: 8999.00, senior: 8799.00 },
+                        3: { children: 1800.00, adults: 12999.00, senior: 11499.00 },
+                        4: { children: 3600.00, adults: 16999.00, senior: 16299.00 },
+                        5: { children: 5400.00, adults: 18999.00, senior: 18099.00 },
+                        6: { children: 7000.00, adults: 20999.00, senior: 19999.00 },
+                        7: { children: 8733.33, adults: 22999.00, senior: 21999.00 },
+                        8: { children: 10433.33, adults: 24999.00, senior: 23799.00 },
+                        9: { children: 12155.56, adults: 26999.00, senior: 25499.00 },
+                        10: { children: 13872.22, adults: 28999.00, senior: 27299.00 },
+                        11: { children: 15583.33, adults: 30999.00, senior: 29499.00 },
+                        12: { children: 17297.22, adults: 32999.00, senior: 30999.00 },
+                        13: { children: 19011.11, adults: 34999.00, senior: 32799.00 },
+                        14: { children: 20725.00, adults: 36999.00, senior: 34499.00 },
+                        15: { children: 22438.89, adults: 38999.00, senior: 36999.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 900.00, adults: 8999.00, senior: 8799.00 },
+                        2: { children: 1800.00, adults: 17998.00, senior: 17598.00 },
+                        3: { children: 3600.00, adults: 25998.00, senior: 22998.00 },
+                        4: { children: 7200.00, adults: 33998.00, senior: 32598.00 },
+                        5: { children: 10800.00, adults: 37998.00, senior: 36198.00 },
+                        6: { children: 14000.00, adults: 41998.00, senior: 39998.00 },
+                        7: { children: 17466.67, adults: 45998.00, senior: 43998.00 },
+                        8: { children: 20866.67, adults: 49998.00, senior: 47598.00 },
+                        9: { children: 24311.11, adults: 53998.00, senior: 50998.00 },
+                        10: { children: 27744.44, adults: 57998.00, senior: 54598.00 },
+                        11: { children: 31166.67, adults: 61998.00, senior: 58998.00 },
+                        12: { children: 34594.44, adults: 65998.00, senior: 61998.00 },
+                        13: { children: 38022.22, adults: 69998.00, senior: 65598.00 },
+                        14: { children: 41450.00, adults: 73998.00, senior: 68998.00 },
+                        15: { children: 44877.78, adults: 77998.00, senior: 73998.00 }
+                    }
+                },
+                 "vip_speedboat_klo": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 0.00, adults: 7999.00, senior: 7499.00 },
+                        2: { children: 2500.00, adults: 9999.00, senior: 9499.00 },
+                        3: { children: 4999.00, adults: 12999.00, senior: 12499.00 },
+                        4: { children: 6999.00, adults: 14999.00, senior: 14499.00 },
+                        5: { children: 8999.00, adults: 16999.00, senior: 15999.00 },
+                        6: { children: 10999.00, adults: 18999.00, senior: 18999.00 },
+                        7: { children: 12999.00, adults: 21465.67, senior: 21065.67 },
+                        8: { children: 14999.00, adults: 23694.24, senior: 23322.81 },
+                        9: { children: 16999.00, adults: 25922.81, senior: 25579.95 },
+                        10: { children: 18999.00, adults: 28151.38, senior: 27837.10 },
+                        11: { children: 20999.00, adults: 30379.95, senior: 30094.24 },
+                        12: { children: 22999.00, adults: 32608.52, senior: 32351.38 },
+                        13: { children: 24999.00, adults: 34837.10, senior: 34608.52 },
+                        14: { children: 26999.00, adults: 37065.67, senior: 36865.67 },
+                        15: { children: 28999.00, adults: 39294.24, senior: 39122.81 }
+                    },
+                     "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 0.00, adults: 7999.00, senior: 7499.00 },
+                        2: { children: 2500.00, adults: 9999.00, senior: 9499.00 },
+                        3: { children: 4999.00, adults: 12999.00, senior: 12499.00 },
+                        4: { children: 6999.00, adults: 14999.00, senior: 14499.00 },
+                        5: { children: 8999.00, adults: 16999.00, senior: 15999.00 },
+                        6: { children: 10999.00, adults: 18999.00, senior: 18999.00 },
+                        7: { children: 12999.00, adults: 21465.67, senior: 21065.67 },
+                        8: { children: 14999.00, adults: 23694.24, senior: 23322.81 },
+                        9: { children: 16999.00, adults: 25922.81, senior: 25579.95 },
+                        10: { children: 18999.00, adults: 28151.38, senior: 27837.10 },
+                        11: { children: 20999.00, adults: 30379.95, senior: 30094.24 },
+                        12: { children: 22999.00, adults: 32608.52, senior: 32351.38 },
+                        13: { children: 24999.00, adults: 34837.10, senior: 34608.52 },
+                        14: { children: 26999.00, adults: 37065.67, senior: 36865.67 },
+                        15: { children: 28999.00, adults: 39294.24, senior: 39122.81 }
+                    },
+                    "Round Trip": {
+                        1: { children: 0.00, adults: 15998.00, senior: 14998.00 },
+                        2: { children: 5000.00, adults: 19998.00, senior: 18998.00 },
+                        3: { children: 9998.00, adults: 25998.00, senior: 24998.00 },
+                        4: { children: 13998.00, adults: 29998.00, senior: 28998.00 },
+                        5: { children: 17998.00, adults: 33998.00, senior: 31998.00 },
+                        6: { children: 21998.00, adults: 37998.00, senior: 37998.00 },
+                        7: { children: 25998.00, adults: 42931.33, senior: 42131.33 },
+                        8: { children: 29998.00, adults: 47388.48, senior: 46645.62 },
+                        9: { children: 33998.00, adults: 51845.62, senior: 51159.90 },
+                        10: { children: 37998.00, adults: 56302.76, senior: 55674.19 },
+                        11: { children: 41998.00, adults: 60759.90, senior: 60188.48 },
+                        12: { children: 45998.00, adults: 65217.05, senior: 64702.76 },
+                        13: { children: 49998.00, adults: 69674.19, senior: 69217.05 },
+                        14: { children: 53998.00, adults: 74131.33, senior: 73731.33 },
+                        15: { children: 57998.00, adults: 78588.48, senior: 78245.62 }
+                    }
+                },
+                "vip_helicopter_klo": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 97999.00, adults: 99999.00, senior: 97999.00 },
+                        2: { children: 102999.00, adults: 104999.00, senior: 102999.00 },
+                        3: { children: 105999.00, adults: 109999.00, senior: 105999.00 },
+                        4: { children: 195998.00, adults: 199998.00, senior: 195998.00 },
+                        5: { children: 199999.00, adults: 202999.00, senior: 200999.00 },
+                        6: { children: 202999.00, adults: 204999.00, senior: 203499.00 },
+                        7: { children: 293997.00, adults: 299997.00, senior: 293997.00 },
+                        8: { children: 308997.00, adults: 314997.00, senior: 308997.00 },
+                        9: { children: 317997.00, adults: 329997.00, senior: 317997.00 },
+                        10: { children: 391996.00, adults: 399996.00, senior: 391996.00 },
+                        11: { children: 411996.00, adults: 419996.00, senior: 411996.00 },
+                        12: { children: 423996.00, adults: 439996.00, senior: 423996.00 },
+                        13: { children: 489995.00, adults: 499995.00, senior: 489995.00 },
+                        14: { children: 514995.00, adults: 524995.00, senior: 514995.00 },
+                        15: { children: 529995.00, adults: 549995.00, senior: 529995.00 }
+                    },
+                     "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 97999.00, adults: 99999.00, senior: 97999.00 },
+                        2: { children: 102999.00, adults: 104999.00, senior: 102999.00 },
+                        3: { children: 105999.00, adults: 109999.00, senior: 105999.00 },
+                        4: { children: 195998.00, adults: 199998.00, senior: 195998.00 },
+                        5: { children: 199999.00, adults: 202999.00, senior: 200999.00 },
+                        6: { children: 202999.00, adults: 204999.00, senior: 203499.00 },
+                        7: { children: 293997.00, adults: 299997.00, senior: 293997.00 },
+                        8: { children: 308997.00, adults: 314997.00, senior: 308997.00 },
+                        9: { children: 317997.00, adults: 329997.00, senior: 317997.00 },
+                        10: { children: 391996.00, adults: 399996.00, senior: 391996.00 },
+                        11: { children: 411996.00, adults: 419996.00, senior: 411996.00 },
+                        12: { children: 423996.00, adults: 439996.00, senior: 423996.00 },
+                        13: { children: 489995.00, adults: 499995.00, senior: 489995.00 },
+                        14: { children: 514995.00, adults: 524995.00, senior: 514995.00 },
+                        15: { children: 529995.00, adults: 549995.00, senior: 529995.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 195998.00, adults: 199998.00, senior: 195998.00 },
+                        2: { children: 205998.00, adults: 209998.00, senior: 205998.00 },
+                        3: { children: 211998.00, adults: 219998.00, senior: 211998.00 },
+                        4: { children: 391996.00, adults: 399996.00, senior: 391996.00 },
+                        5: { children: 399998.00, adults: 405998.00, senior: 401998.00 },
+                        6: { children: 405998.00, adults: 409998.00, senior: 406998.00 },
+                        7: { children: 587994.00, adults: 599994.00, senior: 587994.00 },
+                        8: { children: 617994.00, adults: 629994.00, senior: 617994.00 },
+                        9: { children: 635994.00, adults: 659994.00, senior: 635994.00 },
+                        10: { children: 783992.00, adults: 799992.00, senior: 783992.00 },
+                        11: { children: 823992.00, adults: 839992.00, senior: 823992.00 },
+                        12: { children: 847992.00, adults: 879992.00, senior: 847992.00 },
+                        13: { children: 979990.00, adults: 999990.00, senior: 979990.00 },
+                        14: { children: 1029990.00, adults: 1049990.00, senior: 1029990.00 },
+                        15: { children: 1059990.00, adults: 1099990.00, senior: 1059990.00 }
+                    }
+                }
+            },
+            "NAIA": {
+                "standard_naia": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 0.00, adults: 849.00, senior: 799.00 },
+                        2: { children: 849.00, adults: 849.00, senior: 799.00 }, // This row seems odd, check data source
+                        3: { children: 849.00, adults: 849.00, senior: 799.00 }, // This row seems odd
+                        4: { children: 849.00, adults: 849.00, senior: 799.00 }, // This row seems odd
+                        5: { children: 1698.00, adults: 1698.00, senior: 1598.00 },
+                        6: { children: 1698.00, adults: 1698.00, senior: 1598.00 },
+                        7: { children: 1698.00, adults: 1698.00, senior: 1598.00 },
+                        8: { children: 1698.00, adults: 1698.00, senior: 1598.00 },
+                        9: { children: 2547.00, adults: 2547.00, senior: 2397.00 },
+                        10: { children: 2547.00, adults: 2547.00, senior: 2397.00 },
+                        11: { children: 2547.00, adults: 2547.00, senior: 2397.00 },
+                        12: { children: 2547.00, adults: 2547.00, senior: 2397.00 },
+                        13: { children: 3346.00, adults: 3396.00, senior: 3196.00 }, // Note difference
+                        14: { children: 3346.00, adults: 3396.00, senior: 3196.00 },
+                        15: { children: 3346.00, adults: 3396.00, senior: 3196.00 }
+                    },
+                    "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 0.00, adults: 849.00, senior: 799.00 },
+                        2: { children: 849.00, adults: 849.00, senior: 799.00 },
+                        3: { children: 849.00, adults: 849.00, senior: 799.00 },
+                        4: { children: 849.00, adults: 849.00, senior: 799.00 },
+                        5: { children: 1698.00, adults: 1698.00, senior: 1598.00 },
+                        6: { children: 1698.00, adults: 1698.00, senior: 1598.00 },
+                        7: { children: 1698.00, adults: 1698.00, senior: 1598.00 },
+                        8: { children: 1698.00, adults: 1698.00, senior: 1598.00 },
+                        9: { children: 2547.00, adults: 2547.00, senior: 2397.00 },
+                        10: { children: 2547.00, adults: 2547.00, senior: 2397.00 },
+                        11: { children: 2547.00, adults: 2547.00, senior: 2397.00 },
+                        12: { children: 2547.00, adults: 2547.00, senior: 2397.00 },
+                        13: { children: 3346.00, adults: 3396.00, senior: 3196.00 },
+                        14: { children: 3346.00, adults: 3396.00, senior: 3196.00 },
+                        15: { children: 3346.00, adults: 3396.00, senior: 3196.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 0.00, adults: 1698.00, senior: 1598.00 },
+                        2: { children: 1698.00, adults: 1698.00, senior: 1598.00 }, // Seems odd
+                        3: { children: 1698.00, adults: 1698.00, senior: 1598.00 }, // Seems odd
+                        4: { children: 1698.00, adults: 1698.00, senior: 1598.00 }, // Seems odd
+                        5: { children: 3396.00, adults: 3396.00, senior: 3196.00 },
+                        6: { children: 3396.00, adults: 3396.00, senior: 1598.00 }, // Corrected senior price based on table
+                        7: { children: 3396.00, adults: 3396.00, senior: 1598.00 }, // Corrected senior price
+                        8: { children: 3396.00, adults: 3396.00, senior: 1598.00 }, // Corrected senior price
+                        9: { children: 5094.00, adults: 5094.00, senior: 4794.00 },
+                        10: { children: 5094.00, adults: 5094.00, senior: 4794.00 },
+                        11: { children: 5094.00, adults: 5094.00, senior: 4794.00 },
+                        12: { children: 5094.00, adults: 5094.00, senior: 4794.00 },
+                        13: { children: 6692.00, adults: 6792.00, senior: 6392.00 }, // Note difference
+                        14: { children: 6692.00, adults: 6792.00, senior: 6392.00 },
+                        15: { children: 6692.00, adults: 6792.00, senior: 6392.00 }
+                    }
+                },
+                "vip_grande_naia": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 0.00, adults: 1699.00, senior: 1499.00 },
+                        2: { children: 1299.00, adults: 3398.00, senior: 2998.00 },
+                        3: { children: 1800.00, adults: 5097.00, senior: 4497.00 },
+                        4: { children: 3600.00, adults: 6796.00, senior: 5996.00 },
+                        5: { children: 5400.00, adults: 8495.00, senior: 7495.00 },
+                        6: { children: 7000.00, adults: 10194.00, senior: 8994.00 },
+                        7: { children: 7000.00, adults: 10194.00, senior: 8994.00 }, // Seems odd
+                        8: { children: 7000.00, adults: 10194.00, senior: 8994.00 }, // Seems odd
+                        9: { children: 8299.00, adults: 11893.00, senior: 10493.00 },
+                        10: { children: 9598.00, adults: 13592.00, senior: 11992.00 },
+                        11: { children: 11398.00, adults: 15291.00, senior: 13491.00 },
+                        12: { children: 12697.00, adults: 16990.00, senior: 14990.00 },
+                        13: { children: 13996.00, adults: 18689.00, senior: 16489.00 },
+                        14: { children: 13996.00, adults: 18689.00, senior: 16489.00 }, // Seems odd
+                        15: { children: 13996.00, adults: 18689.00, senior: 16489.00 }  // Seems odd
+                    },
+                    "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 0.00, adults: 1699.00, senior: 1499.00 },
+                        2: { children: 1299.00, adults: 3398.00, senior: 2998.00 },
+                        3: { children: 1800.00, adults: 5097.00, senior: 4497.00 },
+                        4: { children: 3600.00, adults: 6796.00, senior: 5996.00 },
+                        5: { children: 5400.00, adults: 8495.00, senior: 7495.00 },
+                        6: { children: 7000.00, adults: 10194.00, senior: 8994.00 },
+                        7: { children: 7000.00, adults: 10194.00, senior: 8994.00 },
+                        8: { children: 7000.00, adults: 10194.00, senior: 8994.00 },
+                        9: { children: 8299.00, adults: 11893.00, senior: 10493.00 },
+                        10: { children: 9598.00, adults: 13592.00, senior: 11992.00 },
+                        11: { children: 11398.00, adults: 15291.00, senior: 13491.00 },
+                        12: { children: 12697.00, adults: 16990.00, senior: 14990.00 },
+                        13: { children: 13996.00, adults: 18689.00, senior: 16489.00 },
+                        14: { children: 13996.00, adults: 18689.00, senior: 16489.00 },
+                        15: { children: 13996.00, adults: 18689.00, senior: 16489.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 900.00, adults: 3398.00, senior: 2998.00 },
+                        2: { children: 2598.00, adults: 6796.00, senior: 5996.00 },
+                        3: { children: 3600.00, adults: 10194.00, senior: 8994.00 },
+                        4: { children: 7200.00, adults: 13592.00, senior: 11992.00 },
+                        5: { children: 10800.00, adults: 16990.00, senior: 14990.00 },
+                        6: { children: 14000.00, adults: 20388.00, senior: 17988.00 },
+                        7: { children: 14000.00, adults: 20388.00, senior: 17988.00 }, // Seems odd
+                        8: { children: 14000.00, adults: 20388.00, senior: 17988.00 }, // Seems odd
+                        9: { children: 16598.00, adults: 23786.00, senior: 20986.00 },
+                        10: { children: 19196.00, adults: 27184.00, senior: 23984.00 },
+                        11: { children: 22796.00, adults: 30582.00, senior: 26982.00 },
+                        12: { children: 25394.00, adults: 33980.00, senior: 29980.00 },
+                        13: { children: 27992.00, adults: 37378.00, senior: 32978.00 },
+                        14: { children: 27992.00, adults: 37378.00, senior: 32978.00 }, // Seems odd
+                        15: { children: 27992.00, adults: 37378.00, senior: 32978.00 }  // Seems odd
+                    }
+                },
+                "vip_helicopter_naia": {
+                     "Arrival One-way": { // Or "Departure One-way" if same price
+                        1: { children: 180000.00, adults: 180000.00, senior: 180000.00 },
+                        2: { children: 250800.00, adults: 250800.00, senior: 250800.00 },
+                        3: { children: 334350.00, adults: 334350.00, senior: 334350.00 },
+                        4: { children: 404200.00, adults: 404200.00, senior: 404200.00 },
+                        5: { children: 468750.00, adults: 468750.00, senior: 468750.00 },
+                        6: { children: 648750.00, adults: 648750.00, senior: 648750.00 },
+                        7: { children: 719550.00, adults: 719550.00, senior: 719550.00 },
+                        8: { children: 803100.00, adults: 803100.00, senior: 803100.00 },
+                        9: { children: 872950.00, adults: 872950.00, senior: 872950.00 },
+                        10: { children: 937500.00, adults: 937500.00, senior: 937500.00 },
+                        11: { children: 1117500.00, adults: 1117500.00, senior: 1117500.00 },
+                        12: { children: 1188300.00, adults: 1188300.00, senior: 1188300.00 },
+                        13: { children: 1271850.00, adults: 1271850.00, senior: 1271850.00 },
+                        14: { children: 1341700.00, adults: 1341700.00, senior: 1341700.00 },
+                        15: { children: 1406250.00, adults: 1406250.00, senior: 1406250.00 }
+                    },
+                    "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 180000.00, adults: 180000.00, senior: 180000.00 },
+                        2: { children: 250800.00, adults: 250800.00, senior: 250800.00 },
+                        3: { children: 334350.00, adults: 334350.00, senior: 334350.00 },
+                        4: { children: 404200.00, adults: 404200.00, senior: 404200.00 },
+                        5: { children: 468750.00, adults: 468750.00, senior: 468750.00 },
+                        6: { children: 648750.00, adults: 648750.00, senior: 648750.00 },
+                        7: { children: 719550.00, adults: 719550.00, senior: 719550.00 },
+                        8: { children: 803100.00, adults: 803100.00, senior: 803100.00 },
+                        9: { children: 872950.00, adults: 872950.00, senior: 872950.00 },
+                        10: { children: 937500.00, adults: 937500.00, senior: 937500.00 },
+                        11: { children: 1117500.00, adults: 1117500.00, senior: 1117500.00 },
+                        12: { children: 1188300.00, adults: 1188300.00, senior: 1188300.00 },
+                        13: { children: 1271850.00, adults: 1271850.00, senior: 1271850.00 },
+                        14: { children: 1341700.00, adults: 1341700.00, senior: 1341700.00 },
+                        15: { children: 1406250.00, adults: 1406250.00, senior: 1406250.00 }
+                    },
+                    "Round Trip": {
+                        1: { children: 360000.00, adults: 360000.00, senior: 360000.00 },
+                        2: { children: 501600.00, adults: 501600.00, senior: 501600.00 },
+                        3: { children: 668700.00, adults: 668700.00, senior: 668700.00 },
+                        4: { children: 808400.00, adults: 808400.00, senior: 808400.00 },
+                        5: { children: 937500.00, adults: 937500.00, senior: 937500.00 },
+                        6: { children: 1297500.00, adults: 1297500.00, senior: 1297500.00 },
+                        7: { children: 1439100.00, adults: 1439100.00, senior: 1439100.00 },
+                        8: { children: 1606200.00, adults: 1606200.00, senior: 1606200.00 },
+                        9: { children: 1745900.00, adults: 1745900.00, senior: 1745900.00 },
+                        10: { children: 1875000.00, adults: 1875000.00, senior: 1875000.00 },
+                        11: { children: 2235000.00, adults: 2235000.00, senior: 2235000.00 },
+                        12: { children: 2376600.00, adults: 2376600.00, senior: 2376600.00 },
+                        13: { children: 2543700.00, adults: 2543700.00, senior: 2543700.00 },
+                        14: { children: 2683400.00, adults: 2683400.00, senior: 2683400.00 },
+                        15: { children: 2812500.00, adults: 2812500.00, senior: 2812500.00 }
+                    }
+                }
+            },
+             "CEB": {
+                // Pricing data for CEB is missing. Add it here following the same structure.
+                // Example (replace with actual data):
+                /*
+                "standard_ceb": {
+                    "Arrival One-way": {
+                        1: { children: 0.00, adults: 500.00, senior: 450.00 },
+                        // ... add rows 2-15
+                    },
+                     "Departure One-way": { // Assuming same as Arrival One-way
+                        1: { children: 0.00, adults: 500.00, senior: 450.00 },
+                        // ... add rows 2-15
+                    },
+                    "Round Trip": {
+                        1: { children: 0.00, adults: 1000.00, senior: 900.00 },
+                         // ... add rows 2-15
+                    }
+                },
+                "vip_van_ceb": { // Add pricing for VIP VAN
+                     "Arrival One-way": {
+                         1: { children: 0.00, adults: 1500.00, senior: 1400.00 },
+                         // ...
+                     },
+                     "Departure One-way": { // Assuming same price
+                         1: { children: 0.00, adults: 1500.00, senior: 1400.00 },
+                         // ...
+                     },
+                     "Round Trip": {
+                         1: { children: 0.00, adults: 3000.00, senior: 2800.00 },
+                          // ...
+                     }
+                 },
+                "ferry_ceb": { // Add pricing for FERRY
+                     "Arrival One-way": {
+                         1: { children: 0.00, adults: 300.00, senior: 250.00 },
+                         // ...
+                     },
+                     "Departure One-way": { // Assuming same price
+                         1: { children: 0.00, adults: 300.00, senior: 250.00 },
+                         // ...
+                     },
+                     "Round Trip": {
+                         1: { children: 0.00, adults: 600.00, senior: 500.00 },
+                          // ...
+                     }
+                 }
+                */
+             }
+        };
+    
+        // Function to parse currency string to number (handles ₱ and commas)
+        function parseCurrency(currencyString) {
+             if (!currencyString) return 0;
+             // Remove ₱, commas, and spaces, then parse as float
+             return parseFloat(currencyString.replace(/[₱,\s]/g, ''));
+        }
+    
+         // Function to format number as currency (PHP)
+        function formatCurrency(number) {
+            // Use Intl.NumberFormat for better currency formatting
+            try {
+                return new Intl.NumberFormat('en-PH', {
+                    style: 'currency',
+                    currency: 'PHP',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(number);
+            } catch (e) {
+                // Fallback if Intl.NumberFormat is not supported
+                console.error("Intl.NumberFormat not supported, falling back to manual formatting:", e);
+                return '₱' + number.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+        }
+    
+    
+        // Function to calculate price
+        function calculatePrice() {
+            const selectedAirportValue = airportSelect.value;
+            const selectedTransferSelect = document.querySelector('.transfer-options select[name="transfer_' + selectedAirportValue.toLowerCase() + '"]');
+            const selectedTransferValue = selectedTransferSelect ? selectedTransferSelect.value : '';
+            const selectedTripTypeRadio = document.querySelector('input[name="trip_type"]:checked');
+            const selectedTripType = selectedTripTypeRadio ? selectedTripTypeRadio.value : '';
+            const numChildren = parseInt(childrenCountInput.value) || 0; // Use 0 if input is empty or not a number
+            const numAdults = parseInt(adultsCountInput.value) || 0;   // Use 0 if input is empty or not a number
+            const numSeniors = parseInt(seniorCountInput.value) || 0;   // Use 0 if input is empty or not a number
+            const totalPayingGuests = numAdults + numSeniors;
+            const totalGuests = numChildren + numAdults + numSeniors;
+    
+    
+            const priceErrorElement = document.getElementById('priceError');
+            // Removed duplicate declaration of totalGuestWarning
+            // Removed duplicate declaration of payingGuestWarning
+    
+            priceErrorElement.style.display = 'none'; // Hide previous errors
+            totalGuestWarning.style.display = 'none';
+            payingGuestWarning.style.display = 'none';
+    
+    
+             // Basic validation
+             if (!selectedAirportValue || !selectedTransferValue || !selectedTripType || totalGuests === 0) {
+                 // Price cannot be calculated without all main selections or zero total guests
+                 priceErrorElement.textContent = 'Please complete all selections and enter passenger counts.';
+                 priceErrorElement.style.display = 'block';
+                 return null;
+             }
+    
+            if (totalPayingGuests === 0) {
+                 payingGuestWarning.style.display = 'block';
+                 priceErrorElement.textContent = 'Price calculation requires at least one Adult or Senior passenger.';
+                 priceErrorElement.style.display = 'block';
+                 return null;
+            }
+             if (totalPayingGuests > 15) {
+                totalGuestWarning.textContent = 'Total Adults + Seniors exceeds the maximum (15) for available pricing data.';
+                totalGuestWarning.style.display = 'block';
+                priceErrorElement.textContent = 'Cannot calculate price for this number of paying guests.';
+                priceErrorElement.style.display = 'block';
+                return null;
+             }
+    
+    
+            // Look up price in pricingData
+            const airportPrices = pricingData[selectedAirportValue];
+            if (!airportPrices) {
+                 priceErrorElement.textContent = 'Pricing data missing for selected airport.';
+                 priceErrorElement.style.display = 'block';
+                 return null;
+            }
+    
+            const transferPrices = airportPrices[selectedTransferValue];
+            if (!transferPrices) {
+                 priceErrorElement.textContent = 'Pricing data missing for selected transfer service.';
+                 priceErrorElement.style.display = 'block';
+                 return null;
+            }
+    
+            const tripTypePrices = transferPrices[selectedTripType];
+             if (!tripTypePrices) {
+                 priceErrorElement.textContent = `Pricing data missing for "${selectedTripType}" for this service.`;
+                 priceErrorElement.style.display = 'block';
+                 return null;
+            }
+    
+            const guestPrices = tripTypePrices[totalPayingGuests];
+             if (!guestPrices) {
+                priceErrorElement.textContent = `Pricing data missing for ${totalPayingGuests} Adult/Senior guests for this service and trip type.`;
+                priceErrorElement.style.display = 'block';
+                return null;
+             }
+    
+            // Calculate total price based on the complex structure assumption
+            // Total Price = (Num Adults * Price_Per_Adult_at_this_guest_count) + (Num Seniors * Price_Per_Senior_at_this_guest_count) + Total_Children_Price_at_this_guest_count
+            // Assuming the listed 'Adults' price is the total for all adults if you have adults,
+            // the 'Senior' price is total for all seniors if you have seniors, and 'Children' is total for all children if you have children,
+            // all based on the total paying guests number.
+    
+            let totalCalculatedPrice = 0;
+            const adultsPriceInTable = guestPrices.adults;
+            const seniorPriceInTable = guestPrices.senior;
+            const childrenPriceInTable = guestPrices.children;
+    
+             // Re-evaluating interpretation based on data consistency:
+             // Let's assume the table prices are TOTAL for that guest count, AND we add the children price.
+             // And the 'Adults' and 'Seniors' columns are actually the total price for a group consisting ONLY of adults or ONLY of seniors.
+             // This is still very unclear.
+    
+             // STICKING to the interpretation:
+             // "Guest" number is total paying guests (Adults + Seniors).
+             // Table columns are total price contribution FOR THAT CATEGORY at that total paying guest count.
+             // PricePerAdult = AdultsPriceInTable / totalPayingGuests
+             // PricePerSenior = SeniorPriceInTable / totalPayingGuests
+             // TotalChildrenPrice = ChildrenPriceInTable (fixed cost based on total paying guests)
+    
+            if (totalPayingGuests > 0) {
+                 // If you have adults, add the adults portion of the price based on the table
+                 if (numAdults > 0) {
+                     // Simple Proportional approach: Split the table's adult price proportionally if mixed
+                    //  const pricePerAdult = adultsPriceInTable / totalPayingGuests;
+                    //  totalCalculatedPrice += (numAdults * pricePerAdult);
+                    //  Let's assume the table price IS the total for adults at that number of PAYING guests
+                     totalCalculatedPrice += adultsPriceInTable; // Simpler, matches sums in table
+                 }
+                 // If you have seniors, add the seniors portion of the price based on the table
+                 if (numSeniors > 0) {
+                     // Simple Proportional approach: Split the table's senior price proportionally if mixed
+                    //  const pricePerSenior = seniorPriceInTable / totalPayingGuests;
+                    //  totalCalculatedPrice += (numSeniors * pricePerSenior);
+                    // Let's assume the table price IS the total for seniors at that number of PAYING guests
+                     totalCalculatedPrice += seniorPriceInTable; // Simpler, matches sums in table
+                 }
+            }
+    
+            // Add the total children price (which depends only on the total paying guests row)
+            // This price is added IF THERE ARE CHILDREN, assuming the table lists the total child cost.
+             if (numChildren > 0) {
+                 totalCalculatedPrice += childrenPriceInTable;
+             }
+    
+    
+            // Re-reading the tables carefully. Example: MPH Standard One-way, Guest 2.
+            // Children: 750, Adults: 2398, Senior: 2198.
+            // If 2 Adults, 0 Senior: Total paying = 2. Row 2. Price = 2398?
+            // If 1 Adult, 1 Senior: Total paying = 2. Row 2. Price = 2398 + 2198? This seems most logical based on the distinct values.
+            // If 1 Adult, 0 Senior, 1 Child: Total paying = 1. Row 1. Price = 1199 + 0 (child row 1)? But Guest 2 child price is 750.
+            // Okay, let's go with the interpretation:
+            // "Guest" number is total paying guests (Adults + Seniors).
+            // Adult column price is added if Adults > 0.
+            // Senior column price is added if Seniors > 0.
+            // Children column price is added if Children > 0.
+            // All based on the "Guest" row matching total paying guests.
+    
+             totalCalculatedPrice = 0;
+             if (totalPayingGuests > 0) {
+                 const priceDataForGuestCount = tripTypePrices[totalPayingGuests];
+                 if (priceDataForGuestCount) {
+                     if (numAdults > 0) {
+                         totalCalculatedPrice += priceDataForGuestCount.adults;
+                     }
+                     if (numSeniors > 0) {
+                          // If both adults and seniors are present, maybe average their rate contributions?
+                          // Or is the table listing the total for ALL adults AND ALL seniors at that paying guest count?
+                          // Let's assume the simplest: if a category is present, add its corresponding price from the table row.
+                          // This seems inconsistent with the data (e.g. Guest 2 Adults 2398, Senior 2198 implies these are total for that category)
+                          // FINAL Interpretation (matching provided data sums closer):
+                          // Find row for totalPayingGuests.
+                          // Add the 'Adults' price from that row *if* there are adults.
+                          // Add the 'Senior' price from that row *if* there are seniors.
+                          // Add the 'Children' price from that row *if* there are children.
+                           totalCalculatedPrice = 0; // Reset for this interpretation
+    
+                           if (numAdults > 0) {
+                               totalCalculatedPrice += priceDataForGuestCount.adults;
+                           }
+                           if (numSeniors > 0) {
+                               totalCalculatedPrice += priceDataForGuestCount.senior;
+                           }
+                           if (numChildren > 0) {
+                                totalCalculatedPrice += priceDataForGuestCount.children;
+                           }
+    
+                           // This still doesn't make perfect sense with varying numbers in each category.
+                           // Let's return to the 'price per paying guest' interpretation, it's more standard.
+                           // Total Price = (Num Adults * Price_Per_Adult_at_this_guest_count) + (Num Seniors * Price_Per_Senior_at_this_guest_count) + Total_Children_Price_at_this_guest_count
+                            totalCalculatedPrice = 0; // Reset again
+                            const pricePerAdult = adultsPriceInTable / totalPayingGuests;
+                            const pricePerSenior = seniorPriceInTable / totalPayingGuests;
+                            totalCalculatedPrice += (numAdults * pricePerAdult);
+                            totalCalculatedPrice += (numSeniors * pricePerSenior);
+                            totalCalculatedPrice += childrenPriceInTable; // Total child price is fixed for this row
+    
+                           // This interpretation leads to fractional prices, which might not be intended (e.g., 8733.33 for children).
+                           // The most robust approach IS server-side where you can model the pricing accurately.
+    
+                           // Given the data like Guest 2, 2398 (Adults) and 2198 (Senior), and Guest 1 Adult 1199, Senior 1099,
+                           // it LOOKS like the table gives the TOTAL for that category *if only that category existed at that total paying guest count*.
+                           // But if mixed, the calculation is needed. The proportional split seems the most likely model for the data provided if mixing is allowed.
+    
+                            // Let's stick with the proportional split + total child price based on total paying guests.
+    
+                           // The calculation should already be correct based on the earlier proportional interpretation.
+                           // No need to re-calculate totalCalculatedPrice here.
+    
+                     } else {
+                          // Should not happen if totalPayingGuests > 0, but as a fallback
+                          priceErrorElement.textContent = 'Internal pricing lookup error.';
+                          priceErrorElement.style.display = 'block';
+                          return null;
+                     }
+             }
+    
+    
+            return totalCalculatedPrice;
+        }
+    
+    
+        // --- Get references to new elements ---
+        const tripTypeSection = document.getElementById('tripTypeSection');
+        const oneWayArrivalRadio = document.getElementById('oneWayArrival');
+        const oneWayDepartureRadio = document.getElementById('oneWayDeparture');
+        const roundTripRadio = document.getElementById('roundTrip');
+        const passengerSection = document.getElementById('passengerSection');
+        const childrenCountInput = document.getElementById('childrenCount'); // Changed to Input
+        const adultsCountInput = document.getElementById('adultsCount');     // Changed to Input
+        const seniorCountInput = document.getElementById('seniorCount');     // Changed to Input
+        const datetimeSection = document.getElementById('datetimeSection');
+        const oneWayDateTimeDiv = document.getElementById('oneWayDateTime');
+        const roundTripDateTimeDiv = document.getElementById('roundTripDateTime');
+        const oneWayDateInput = document.getElementById('oneWayDate');
+        const arrivalDateInput = document.getElementById('arrivalDate');
+        const departureDateInput = document.getElementById('departureDate');
+        const passengerInputs = document.querySelectorAll('.passenger-input'); // Changed to Inputs NodeList
+        const payingGuestWarning = document.getElementById('payingGuestWarning');
+        const totalGuestWarning = document.getElementById('totalGuestWarning'); // Added
+    
+    
+        // Get references to existing elements (from previous code)
+        const airportSelect = document.getElementById('airportSelect');
+        const transferMphDiv = document.getElementById('transferMph');
+        const transferKloDiv = document.getElementById('transferKlo');
+        const transferNaiaDiv = document.getElementById('transferNaia');
+        const transferCebDiv = document.getElementById('transferCeb');
+        const transferForm = document.getElementById('transferForm');
+        const selectedDataDiv = document.getElementById('selectedData');
+        const displayAirport = document.getElementById('displayAirport');
+        const displayTransfer = document.getElementById('displayTransfer');
+        const displayTripType = document.getElementById('displayTripType');
+        const displayPassengers = document.getElementById('displayPassengers');
+        const displayDateTime = document.getElementById('displayDateTime');
+        const displayPrice = document.getElementById('displayPrice');
+        const transferSelects = document.querySelectorAll('.transfer-select'); // Get all transfer selects
+    
+    
+        // --- Event Listeners ---
+    
+        // Add an event listener to the airport dropdown
+        airportSelect.addEventListener('change', function() {
+            const selectedAirport = this.value;
+    
+            // Hide all transfer option divs and reset their selections
+            document.querySelectorAll('.transfer-options').forEach(div => div.style.display = 'none');
+            transferSelects.forEach(select => select.selectedIndex = 0);
+    
+            // Hide other sections when airport changes
+            tripTypeSection.style.display = 'none';
+            passengerSection.style.display = 'none';
+            datetimeSection.style.display = 'none';
+            oneWayDateTimeDiv.style.display = 'none';
+            roundTripDateTimeDiv.style.display = 'none';
+             // Reset trip type radios
+            document.querySelectorAll('input[name="trip_type"]').forEach(radio => radio.checked = false);
+             // Reset passenger counts and warnings
+            childrenCountInput.value = 0;
+            adultsCountInput.value = 1; // Default adult to 1
+            seniorCountInput.value = 0;
+            payingGuestWarning.style.display = 'none';
+            totalGuestWarning.style.display = 'none';
+    
+    
+            // Show the relevant transfer option div based on the selection
+            if (selectedAirport === 'MPH') {
+                transferMphDiv.style.display = 'block';
+            } else if (selectedAirport === 'KLO') {
+                transferKloDiv.style.display = 'block';
+            } else if (selectedAirport === 'NAIA') {
+                transferNaiaDiv.style.display = 'block';
+            } else if (selectedAirport === 'CEB') {
+                 transferCebDiv.style.display = 'block';
+                // NOTE: CEB pricing data is missing in the JS object!
+            }
+    
+            // Hide displayed data
+            selectedDataDiv.style.display = 'none';
+            displayAirport.textContent = '';
+            displayTransfer.textContent = '';
+            displayTripType.textContent = '';
+            displayPassengers.textContent = '';
+            displayDateTime.textContent = '';
+            displayPrice.textContent = '';
+            document.getElementById('priceError').style.display = 'none';
+        });
+    
+    
+        // Add event listeners to transfer service dropdowns
+        // Use event delegation on the form to catch changes in any transfer select
+        transferForm.addEventListener('change', function(event) {
+            if (event.target.classList.contains('transfer-select')) {
+                 const selectedTransferValue = event.target.value;
+                 // Show trip type and passenger sections when a transfer is selected
+                 if (selectedTransferValue) {
+                    tripTypeSection.style.display = 'block';
+                    passengerSection.style.display = 'block';
+                    // Keep datetime hidden until trip type is selected
+                    datetimeSection.style.display = 'none';
+                    oneWayDateTimeDiv.style.display = 'none';
+                    roundTripDateTimeDiv.style.display = 'none';
+                    // Reset trip type radios
+                    document.querySelectorAll('input[name="trip_type"]').forEach(radio => radio.checked = false);
+    
+    
+                 } else {
+                    // Hide if "Select Transfer" is chosen
+                    tripTypeSection.style.display = 'none';
+                    passengerSection.style.display = 'none';
+                    datetimeSection.style.display = 'none';
+                     // Reset trip type radios
+                    document.querySelectorAll('input[name="trip_type"]').forEach(radio => radio.checked = false);
+    
+                 }
+                 // Hide displayed data
+                 selectedDataDiv.style.display = 'none';
+                 displayAirport.textContent = '';
+                 displayTransfer.textContent = '';
+                 displayTripType.textContent = '';
+                 displayPassengers.textContent = '';
+                 displayDateTime.textContent = '';
+                 displayPrice.textContent = '';
+                 document.getElementById('priceError').style.display = 'none';
+                 payingGuestWarning.style.display = 'none';
+                 totalGuestWarning.style.display = 'none';
+            }
+        });
+    
+    
+        // Add event listeners to trip type radio buttons
+        document.querySelectorAll('input[name="trip_type"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                datetimeSection.style.display = 'block';
+                oneWayDateTimeDiv.style.display = 'none';
+                roundTripDateTimeDiv.style.display = 'none';
+    
+                // Reset date/time inputs
+                oneWayDateInput.value = '';
+                arrivalDateInput.value = '';
+                departureDateInput.value = '';
+    
+                if (this.value.includes('One-way')) {
+                    oneWayDateTimeDiv.style.display = 'block';
+                     oneWayDateInput.required = true; // Make date required for one-way
+                     arrivalDateInput.required = false;
+                     departureDateInput.required = false;
+                } else if (this.value === 'Round Trip') {
+                    roundTripDateTimeDiv.style.display = 'block';
+                     oneWayDateInput.required = false;
+                     arrivalDateInput.required = true; // Make dates required for round trip
+                     departureDateInput.required = true;
+                }
+                 // Hide displayed data
+                 selectedDataDiv.style.display = 'none';
+                 displayAirport.textContent = '';
+                 displayTransfer.textContent = '';
+                 displayTripType.textContent = '';
+                 displayPassengers.textContent = '';
+                 displayDateTime.textContent = '';
+                 displayPrice.textContent = '';
+                 document.getElementById('priceError').style.display = 'none';
+            });
+        });
+    
+        // Add event listeners to passenger count inputs to show/hide warning and update price
+        passengerInputs.forEach(input => {
+            input.addEventListener('input', function() { // Listen for 'input' event on number inputs
+                 const numAdults = parseInt(adultsCountInput.value) || 0;
+                 const numSeniors = parseInt(seniorCountInput.value) || 0;
+                 const totalPayingGuests = numAdults + numSeniors;
+    
+                 payingGuestWarning.style.display = (totalPayingGuests === 0) ? 'block' : 'none';
+                 totalGuestWarning.style.display = (totalPayingGuests > 15) ? 'block' : 'none';
+    
+    
+                 // Hide displayed data when passenger counts change (optional, could also trigger price update)
+                 selectedDataDiv.style.display = 'none';
+                 displayAirport.textContent = '';
+                 displayTransfer.textContent = '';
+                 displayTripType.textContent = '';
+                 displayPassengers.textContent = '';
+                 displayDateTime.textContent = '';
+                 displayPrice.textContent = '';
+                 document.getElementById('priceError').style.display = 'none';
+            });
+        });
+    
+    
+        // Add an event listener to the form submission
+        transferForm.addEventListener('submit', function(event) {
+            // Prevent the default form submission
+            event.preventDefault();
+    
+            // Basic Validation before getting data
+            const selectedAirportValue = airportSelect.value;
+            if (!selectedAirportValue) {
+                alert('Please select an Airport.');
+                return;
+            }
+    
+            const selectedTransferSelect = document.querySelector('.transfer-options select[name="transfer_' + selectedAirportValue.toLowerCase() + '"]');
+             if (!selectedTransferSelect || !selectedTransferSelect.value) {
+                 alert('Please select a Transfer Service.');
+                 return;
+             }
+            const selectedTransferText = selectedTransferSelect.options[selectedTransferSelect.selectedIndex].textContent;
+    
+    
+            const selectedTripTypeRadio = document.querySelector('input[name="trip_type"]:checked');
+            if (!selectedTripTypeRadio) {
+                alert('Please select a Trip Type.');
+                return;
+            }
+            const selectedTripType = selectedTripTypeRadio.value;
+    
+            const numChildren = parseInt(childrenCountInput.value) || 0;
+            const numAdults = parseInt(adultsCountInput.value) || 0;
+            const numSeniors = parseInt(seniorCountInput.value) || 0;
+            const totalPayingGuests = numAdults + numSeniors;
+            const totalGuests = numChildren + numAdults + numSeniors;
+    
+    
+             if (totalGuests === 0) {
+                 alert('Please enter the number of passengers.');
+                 return;
+             }
+             if (totalPayingGuests === 0) {
+                 alert('Price calculation requires at least one Adult or Senior passenger.');
+                 return;
+             }
+              if (totalPayingGuests > 15) {
+                 alert('Total Adults + Seniors exceeds the maximum (15) for available pricing data.');
+                 return;
+             }
+    
+    
+            let dateTimeInfo = '';
+            if (selectedTripType.includes('One-way')) {
+                 if (!oneWayDateInput.value) {
+                     alert('Please select Date & Time for the one-way trip.');
+                     return;
+                 }
+                 // Format date nicely for display
+                 const dateObj = new Date(oneWayDateInput.value);
+                 dateTimeInfo = 'Date & Time: ' + dateObj.toLocaleString('en-PH', {
+                     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true
+                 });
+    
+            } else if (selectedTripType === 'Round Trip') {
+                 if (!arrivalDateInput.value || !departureDateInput.value) {
+                     alert('Please select both Arrival and Departure Dates & Times.');
+                     return;
+                 }
+                 const arrivalDateTime = new Date(arrivalDateInput.value);
+                 const departureDateTime = new Date(departureDateInput.value);
+                 if (departureDateTime < arrivalDateTime) {
+                      alert('Departure Date & Time cannot be before Arrival Date & Time.');
+                      return;
+                 }
+                 // Format dates nicely for display
+                  dateTimeInfo = 'Arrival: ' + arrivalDateTime.toLocaleString('en-PH', {
+                     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true
+                 }) + '<br>Departure: ' + departureDateTime.toLocaleString('en-PH', {
+                     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true
+                 });
+            }
+    
+    
+            // Get selected values and texts
+            const selectedAirportText = airportSelect.options[airportSelect.selectedIndex].textContent;
+    
+    
+            // Display the selected data
+            displayAirport.textContent = 'Airport: ' + selectedAirportText; // Simpler display
+            displayTransfer.textContent = 'Transfer: ' + selectedTransferText; // Simpler display
+            displayTripType.textContent = 'Trip Type: ' + selectedTripType;
+            displayPassengers.textContent = `Passengers: Children (${numChildren}), Adults (${numAdults}), Senior (${numSeniors}) (Total Paying: ${totalPayingGuests})`;
+            displayDateTime.innerHTML = dateTimeInfo; // Use innerHTML because of <br>
+    
+    
+            // Calculate and display price
+            const estimatedPrice = calculatePrice();
+            const priceErrorElement = document.getElementById('priceError');
+    
+            if (estimatedPrice !== null) { // check if calculation was successful
+                 displayPrice.textContent = 'Estimated Price: ' + formatCurrency(estimatedPrice);
+                 priceErrorElement.style.display = 'none'; // Hide any previous price errors
+            } else {
+                 displayPrice.textContent = ''; // Clear price if calculation failed
+                // The calculatePrice function will show the specific error message
+            }
+    
+            selectedDataDiv.style.display = 'block'; // Show the summary area
+    
+    
+            // In a real application, you would send this data to a server
+            // using technologies like Fetch API or XMLHttpRequest to handle
+            // secure price calculation and interaction with Stripe.
+            const bookingDetails = {
+                airport: selectedAirportValue,
+                transfer: selectedTransferValue,
+                tripType: selectedTripType,
+                passengers: {
+                    children: numChildren,
+                    adults: numAdults,
+                    senior: numSeniors
+                },
+                oneWayDateTime: selectedTripType.includes('One-way') ? oneWayDateInput.value : null,
+                arrivalDateTime: selectedTripType === 'Round Trip' ? arrivalDateInput.value : null,
+                departureDateTime: selectedTripType === 'Round Trip' ? departureDateInput.value : null,
+                calculatedPrice: estimatedPrice // Send the calculated price as well (server should re-calculate for security)
+            };
+    
+            console.log('Booking Details:', bookingDetails);
+    
+            // Example of sending data to a server (uncomment and modify for your backend)
+            /*
+            fetch('/your-backend-endpoint-for-booking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bookingDetails),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server Response:', data);
+                // Handle server response, e.g., redirect to Stripe Checkout
+                // if (data.stripeCheckoutUrl) {
+                //     window.location.href = data.stripeCheckoutUrl;
+                // } else {
+                //     alert('Booking failed: ' + data.error);
+                // }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred during booking.');
+            });
+            */
+        });
+    
+        // Initial state: hide transfer options
+        hideAllTransferDivs(); // Call the function defined earlier
+        resetAllTransferSelects(); // Call the function defined earlier
+    
+        // Helper functions (can be moved outside if preferred)
+         function hideAllTransferDivs() {
+            transferMphDiv.style.display = 'none';
+            transferKloDiv.style.display = 'none';
+            transferNaiaDiv.style.display = 'none';
+            transferCebDiv.style.display = 'none';
+        }
+    
+        function resetAllTransferSelects() {
+            transferSelects.forEach(select => select.selectedIndex = 0);
+        }
+        <div>
+            <div>
+                <form id="transferForm"></form>
+            </div>
+    
+            <div id="selectedData">
+                <h2>Booking Summary:</h2>
+                <p id="displayAirport"></p>
+                <p id="displayTransfer"></p>
+                <p id="displayTripType"></p>
+                <p id="displayPassengers"></p>
+                <p id="displayDateTime"></p>
+                <p id="displayPrice" class="price"></p>
+                <p id="priceError" class="error" style="display: none;"></p>
+            </div>
+            <script>
+                // Add your JavaScript here
+            </script>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
